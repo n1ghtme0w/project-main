@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useApp } from '../context/AppContext';
 import { TaskModal } from './TaskModal';
 import { Task } from '../types';
 
 export function CalendarView() {
-  const { users, getCurrentBoardTasks } = useApp();
+  const { users, getCurrentBoardTasks, boards, currentBoardId } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   React.useEffect(() => {
@@ -22,16 +23,20 @@ export function CalendarView() {
   }, []);
 
   const tasks = getCurrentBoardTasks();
+  const currentBoard = boards.find(board => board.id === currentBoardId);
+  const boardCreationDate = currentBoard ? new Date(currentBoard.createdAt) : new Date();
+  
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
-      return newDate;
-    });
+    const newDate = direction === 'next' ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
+    
+    // Ограничиваем навигацию месяцем создания доски
+    if (newDate >= startOfMonth(boardCreationDate)) {
+      setCurrentDate(newDate);
+    }
   };
 
   const getTasksForDay = (date: Date) => {
@@ -46,6 +51,12 @@ export function CalendarView() {
     setIsModalOpen(true);
   };
 
+  const handleDayClick = (day: Date) => {
+    if (isMobile) {
+      setSelectedDay(day);
+    }
+  };
+
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedTask(null);
@@ -57,17 +68,19 @@ export function CalendarView() {
     low: '#BAFFC9',
   };
 
-  // Мобильная версия - список задач с точками приоритета
+  // Мобильная версия - список задач с точками приоритета и кликабельным календарем
   if (isMobile) {
     const tasksWithDates = tasks
       .filter(task => task.deadline)
       .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
 
+    const selectedDayTasks = selectedDay ? getTasksForDay(selectedDay) : [];
+
     return (
       <div className="p-4 h-full overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
-            <CalendarIcon className="w-5 h-5" style={{ color: '#91caff' }} />
+            <CalendarIcon className="w-5 h-5" style={{ color: '#b6c2fc' }} />
             <h2 className="text-lg font-bold text-gray-900 uppercase">
               КАЛЕНДАРЬ ЗАДАЧ
             </h2>
@@ -76,13 +89,14 @@ export function CalendarView() {
             <button
               onClick={() => navigateMonth('prev')}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              disabled={startOfMonth(subMonths(currentDate, 1)) < startOfMonth(boardCreationDate)}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setCurrentDate(new Date())}
               className="px-3 py-1 rounded-lg transition-colors font-medium uppercase text-sm"
-              style={{ color: '#91caff' }}
+              style={{ color: '#b6c2fc' }}
             >
               СЕГОДНЯ
             </button>
@@ -112,6 +126,7 @@ export function CalendarView() {
               const dayTasks = getTasksForDay(day);
               const isCurrentMonth = isSameMonth(day, currentDate);
               const isDayToday = isToday(day);
+              const isSelected = selectedDay && isSameDay(day, selectedDay);
               const highPriorityTasks = dayTasks.filter(task => task.priority === 'high');
               const mediumPriorityTasks = dayTasks.filter(task => task.priority === 'medium');
               const lowPriorityTasks = dayTasks.filter(task => task.priority === 'low');
@@ -119,9 +134,10 @@ export function CalendarView() {
               return (
                 <div
                   key={index}
-                  className={`p-2 border-b border-r border-gray-200 min-h-[60px] ${
+                  onClick={() => handleDayClick(day)}
+                  className={`p-2 border-b border-r border-gray-200 min-h-[60px] cursor-pointer hover:bg-gray-50 transition-colors ${
                     !isCurrentMonth ? 'bg-gray-50' : 'bg-white'
-                  }`}
+                  } ${isSelected ? 'bg-blue-100' : ''}`}
                 >
                   <div className={`text-sm font-medium mb-1 ${
                     isDayToday 
@@ -130,7 +146,7 @@ export function CalendarView() {
                       ? 'text-gray-900' 
                       : 'text-gray-400'
                   }`}
-                  style={isDayToday ? { backgroundColor: '#91caff' } : {}}
+                  style={isDayToday ? { backgroundColor: '#b6c2fc' } : {}}
                   >
                     {format(day, 'd')}
                   </div>
@@ -153,9 +169,54 @@ export function CalendarView() {
           </div>
         </div>
 
-        {/* Список задач */}
+        {/* Задачи выбранного дня */}
+        {selectedDay && (
+          <div className="mb-6">
+            <h3 className="text-md font-semibold text-gray-900 uppercase mb-3">
+              ЗАДАЧИ НА {format(selectedDay, 'dd MMMM yyyy', { locale: ru }).toUpperCase()}
+            </h3>
+            {selectedDayTasks.length > 0 ? (
+              <div className="space-y-3">
+                {selectedDayTasks.map((task) => {
+                  const assignees = users.filter(user => task.assigneeIds.includes(user.id));
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      onClick={() => handleTaskClick(task)}
+                      className="bg-white rounded-lg shadow-sm border p-4 cursor-pointer hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 uppercase text-sm mb-1">
+                            {task.title}
+                          </h4>
+                          {assignees.length > 0 && (
+                            <div className="text-xs text-gray-600 uppercase">
+                              {assignees.map(user => user.firstName + ' ' + user.lastName).join(', ')}
+                            </div>
+                          )}
+                        </div>
+                        <div 
+                          className="w-4 h-4 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: priorityColors[task.priority] }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p className="text-sm uppercase">НЕТ ЗАДАЧ НА ЭТОТ ДЕНЬ</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Список всех задач с датами */}
         <div className="space-y-3">
-          <h3 className="text-md font-semibold text-gray-900 uppercase">ЗАДАЧИ С ДАТАМИ</h3>
+          <h3 className="text-md font-semibold text-gray-900 uppercase">ВСЕ ЗАДАЧИ С ДАТАМИ</h3>
           {tasksWithDates.map((task) => {
             const assignees = users.filter(user => task.assigneeIds.includes(user.id));
             const taskDate = new Date(task.deadline!);
@@ -213,7 +274,7 @@ export function CalendarView() {
       {/* Заголовок календаря */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <CalendarIcon className="w-6 h-6" style={{ color: '#91caff' }} />
+          <CalendarIcon className="w-6 h-6" style={{ color: '#b6c2fc' }} />
           <h2 className="text-2xl font-bold text-gray-900 uppercase">
             {format(currentDate, 'LLLL yyyy', { locale: ru }).toUpperCase()}
           </h2>
@@ -223,13 +284,14 @@ export function CalendarView() {
           <button
             onClick={() => navigateMonth('prev')}
             className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            disabled={startOfMonth(subMonths(currentDate, 1)) < startOfMonth(boardCreationDate)}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => setCurrentDate(new Date())}
             className="px-4 py-2 rounded-lg transition-colors font-medium uppercase"
-            style={{ color: '#91caff' }}
+            style={{ color: '#b6c2fc' }}
           >
             СЕГОДНЯ
           </button>
@@ -274,7 +336,7 @@ export function CalendarView() {
                     ? 'text-gray-900' 
                     : 'text-gray-400'
                 }`}
-                style={isDayToday ? { backgroundColor: '#91caff' } : {}}
+                style={isDayToday ? { backgroundColor: '#b6c2fc' } : {}}
                 >
                   {format(day, 'd')}
                 </div>

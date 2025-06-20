@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Calendar,
@@ -42,6 +42,26 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Закрытие выпадающих меню при клике вне их
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      
+      // Закрываем выпадающее меню досок
+      if (showBoardDropdown && !target.closest('.board-dropdown-container')) {
+        setShowBoardDropdown(false);
+      }
+      
+      // Закрываем панель уведомлений
+      if (showNotifications && !target.closest('.notification-panel-container')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showBoardDropdown, showNotifications]);
+
   const tasks = getCurrentBoardTasks();
   const activeTasks = tasks.filter(task => task.status !== 'completed').length;
   const currentBoard = boards.find(board => board.id === currentBoardId);
@@ -80,22 +100,24 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
     });
   };
 
+  const iconColor = '#b6c2fc';
+
   return (
     <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 md:space-x-8 flex-1 min-w-0">
           <div className="flex items-center space-x-3 flex-shrink-0">
-            <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-teal-600 rounded-xl">
+            <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl" style={{ background: `linear-gradient(135deg, ${iconColor} 0%, #a4d2fc 100%)` }}>
               <FileText className="w-4 h-4 md:w-6 md:h-6 text-white" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg md:text-xl font-bold text-gray-900 uppercase">PLANIFY</h1>
-              <p className="text-xs md:text-sm text-gray-500 uppercase">{activeTasks} АКТИВНЫХ ЗАДАЧ</p>
+              <p className="text-xs md:text-sm text-gray-500 uppercase">АКТИВНЫХ ЗАДАЧ: {activeTasks}</p>
             </div>
           </div>
 
           {/* Селектор досок */}
-          <div className="relative flex-1 max-w-xs">
+          <div className="relative flex-1 max-w-xs board-dropdown-container">
             <button
               onClick={() => setShowBoardDropdown(!showBoardDropdown)}
               className="flex items-center space-x-2 px-3 md:px-4 py-2 rounded-lg transition-colors w-full text-left bg-white border border-gray-200 hover:border-gray-300"
@@ -174,9 +196,9 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
                   ? 'text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              style={{ backgroundColor: currentView === 'board' ? '#a4d2fc' : 'transparent' }}
+              style={{ backgroundColor: currentView === 'board' ? iconColor : 'transparent' }}
             >
-              <LayoutGrid className="w-5 h-5" />
+              <LayoutGrid className="w-5 h-5" style={{ color: currentView === 'board' ? 'white' : iconColor }} />
               <span className="uppercase">ДОСКА</span>
             </button>
             <button
@@ -186,9 +208,9 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
                   ? 'text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              style={{ backgroundColor: currentView === 'calendar' ? '#a4d2fc' : 'transparent' }}
+              style={{ backgroundColor: currentView === 'calendar' ? iconColor : 'transparent' }}
             >
-              <Calendar className="w-5 h-5" style={{ color: currentView === 'calendar' ? 'white' : '#91caff' }} />
+              <Calendar className="w-5 h-5" style={{ color: currentView === 'calendar' ? 'white' : iconColor }} />
               <span className="uppercase">КАЛЕНДАРЬ</span>
             </button>
             <button
@@ -198,9 +220,9 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
                   ? 'text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              style={{ backgroundColor: currentView === 'analytics' ? '#a4d2fc' : 'transparent' }}
+              style={{ backgroundColor: currentView === 'analytics' ? iconColor : 'transparent' }}
             >
-              <BarChart3 className="w-5 h-5" />
+              <BarChart3 className="w-5 h-5" style={{ color: currentView === 'analytics' ? 'white' : iconColor }} />
               <span className="uppercase">АНАЛИТИКА</span>
             </button>
             <button
@@ -210,9 +232,9 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
                   ? 'text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              style={{ backgroundColor: currentView === 'users' ? '#a4d2fc' : 'transparent' }}
+              style={{ backgroundColor: currentView === 'users' ? iconColor : 'transparent' }}
             >
-              <Users className="w-5 h-5" />
+              <Users className="w-5 h-5" style={{ color: currentView === 'users' ? 'white' : iconColor }} />
               <span className="uppercase">ПОЛЬЗОВАТЕЛИ</span>
             </button>
           </nav>
@@ -228,7 +250,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
             <span className="hidden sm:inline uppercase text-sm md:text-base">СОЗДАТЬ ЗАДАЧУ</span>
           </button>
 
-          <div className="relative">
+          <div className="relative notification-panel-container">
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -290,7 +312,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
               : 'text-gray-600'
           }`}
         >
-          <LayoutGrid className="w-4 h-4" />
+          <LayoutGrid className="w-4 h-4" style={{ color: currentView === 'board' ? '#1d4ed8' : iconColor }} />
           <span className="text-xs uppercase">ДОСКА</span>
         </button>
         <button
@@ -301,7 +323,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
               : 'text-gray-600'
           }`}
         >
-          <Calendar className="w-4 h-4" style={{ color: currentView === 'calendar' ? '#1d4ed8' : '#91caff' }} />
+          <Calendar className="w-4 h-4" style={{ color: currentView === 'calendar' ? '#1d4ed8' : iconColor }} />
           <span className="text-xs uppercase">КАЛЕНДАРЬ</span>
         </button>
         <button
@@ -312,7 +334,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
               : 'text-gray-600'
           }`}
         >
-          <BarChart3 className="w-4 h-4" />
+          <BarChart3 className="w-4 h-4" style={{ color: currentView === 'analytics' ? '#1d4ed8' : iconColor }} />
           <span className="text-xs uppercase">АНАЛИТИКА</span>
         </button>
         <button
@@ -323,7 +345,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
               : 'text-gray-600'
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4" style={{ color: currentView === 'users' ? '#1d4ed8' : iconColor }} />
           <span className="text-xs uppercase">ПОЛЬЗОВАТЕЛИ</span>
         </button>
         <button
@@ -334,7 +356,7 @@ export function Header({ currentView, onViewChange, onCreateTask }: HeaderProps)
               : 'text-gray-600'
           }`}
         >
-          <UserIcon className="w-4 h-4" />
+          <UserIcon className="w-4 h-4" style={{ color: currentView === 'profile' ? '#1d4ed8' : iconColor }} />
           <span className="text-xs uppercase">ПРОФИЛЬ</span>
         </button>
       </nav>

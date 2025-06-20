@@ -392,7 +392,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors"
                 placeholder="ВВЕДИТЕ НАЗВАНИЕ ЗАДАЧИ..."
                 required
               />
@@ -479,7 +479,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[120px]"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors resize-y min-h-[120px]"
                 placeholder="ОПИШИТЕ ЗАДАЧУ..."
               />
               
@@ -488,7 +488,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                 <div className="mt-2 p-3 bg-gray-50 rounded-xl border">
                   <div className="text-sm text-gray-600 mb-1 uppercase">ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР:</div>
                   <div 
-                    className="text-sm text-gray-800 leading-relaxed"
+                    className="text-sm text-gray-800 leading-relaxed formatted-text"
                     dangerouslySetInnerHTML={{ __html: formatTextForDisplay(formData.description) }}
                   />
                 </div>
@@ -667,7 +667,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as Task['status'] })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors uppercase"
                 >
                   <option value="created">{statusLabels.created}</option>
                   <option value="in-progress">{statusLabels['in-progress']}</option>
@@ -682,7 +682,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value as Task['priority'] })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors uppercase"
                 >
                   <option value="low">{priorityLabels.low}</option>
                   <option value="medium">{priorityLabels.medium}</option>
@@ -737,7 +737,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                   value={formData.deadline}
                   min={getTodayDate()}
                   onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors"
                 />
               </div>
             </div>
@@ -755,8 +755,18 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                     return (
                       <div key={comment.id} className="bg-gray-50 rounded-xl p-3">
                         <div className="flex items-center space-x-2 mb-1">
-                          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                            {commenter?.firstName?.charAt(0).toUpperCase()}{commenter?.lastName?.charAt(0).toUpperCase()}
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium overflow-hidden">
+                            {commenter?.avatar ? (
+                              <img
+                                src={commenter.avatar}
+                                alt="Avatar"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center">
+                                {commenter?.firstName?.charAt(0).toUpperCase()}{commenter?.lastName?.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                           </div>
                           <span className="text-sm font-medium text-gray-900 uppercase">
                             {commenter?.firstName} {commenter?.lastName}
@@ -777,7 +787,7 @@ export function TaskModal({ task, isOpen, onClose, defaultStatus = 'created' }: 
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="ДОБАВИТЬ КОММЕНТАРИЙ..."
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#b6c2fc] focus:border-[#b6c2fc] transition-colors text-sm"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
                   />
                   <button

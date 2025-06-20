@@ -7,6 +7,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  closestCenter,
 } from '@dnd-kit/core';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskCard } from './TaskCard';
@@ -60,11 +61,30 @@ export function KanbanBoard() {
     }
 
     const taskId = active.id as string;
-    const newStatus = over.id as Task['status'];
+    const task = tasks.find(t => t.id === taskId);
     
-    if (columns.some(col => col.id === newStatus)) {
-      updateTask(taskId, { status: newStatus });
+    if (!task) {
+      setActiveTask(null);
+      return;
     }
+
+    // Определяем новый статус
+    let newStatus: Task['status'];
+    if (columns.some(col => col.id === over.id)) {
+      newStatus = over.id as Task['status'];
+    } else {
+      // Если перетащили на другую задачу, определяем статус по колонке
+      const targetTask = tasks.find(t => t.id === over.id);
+      if (targetTask) {
+        newStatus = targetTask.status;
+      } else {
+        setActiveTask(null);
+        return;
+      }
+    }
+
+    // Обновляем статус задачи
+    updateTask(taskId, { status: newStatus });
     
     setActiveTask(null);
   };
@@ -86,11 +106,20 @@ export function KanbanBoard() {
     setCreateInColumn(null);
   };
 
-  // Сортировка задач: закрепленные первыми, затем по дате создания
+  // Сортировка задач: закрепленные первыми, затем по приоритету (высокий, средний, низкий), затем по дате создания
   const sortTasks = (tasks: Task[]) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    
     return [...tasks].sort((a, b) => {
+      // Сначала закрепленные
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
+      
+      // Затем по приоритету (высокий -> средний -> низкий)
+      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Затем по дате создания (новые первыми)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   };
@@ -101,6 +130,7 @@ export function KanbanBoard() {
       <div className="h-[calc(100vh-180px)] overflow-hidden">
         <DndContext
           sensors={sensors}
+          collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
@@ -154,6 +184,7 @@ export function KanbanBoard() {
     <div className="h-[calc(100vh-180px)] overflow-auto">
       <DndContext
         sensors={sensors}
+        collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

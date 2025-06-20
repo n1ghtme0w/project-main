@@ -164,7 +164,19 @@ export function TaskCard({ task, users, onClick, className = '' }: TaskCardProps
       {latestComment && commentAuthor && (
         <div className="bg-gray-100 rounded-lg p-2 mb-3 border border-gray-200">
           <div className="flex items-center space-x-2 mb-1">
-            <User className="w-3 h-3 text-gray-500" />
+            <div className="w-3 h-3 rounded-full overflow-hidden">
+              {commentAuthor.avatar ? (
+                <img
+                  src={commentAuthor.avatar}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center">
+                  <User className="w-2 h-2 text-white" />
+                </div>
+              )}
+            </div>
             <span className="text-xs font-medium text-gray-700 uppercase">
               {commentAuthor.firstName} {commentAuthor.lastName}:
             </span>
@@ -222,10 +234,20 @@ export function TaskCard({ task, users, onClick, className = '' }: TaskCardProps
               {assignees.slice(0, 3).map((assignee, index) => (
                 <div
                   key={assignee.id}
-                  className="w-6 h-6 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium border-2 border-white overflow-hidden"
                   title={`${assignee.firstName} ${assignee.lastName}`}
                 >
-                  {assignee.firstName.charAt(0).toUpperCase()}
+                  {assignee.avatar ? (
+                    <img
+                      src={assignee.avatar}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center">
+                      {assignee.firstName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
               ))}
               {assignees.length > 3 && (
