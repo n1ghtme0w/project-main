@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Пользовательские стили скроллбара */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-gray-300 {
+  scrollbar-color: #d1d5db transparent;
+}
+
+.scrollbar-track-transparent {
+  scrollbar-track-color: transparent;
+}
+
+/* Стили скроллбара Webkit для лучшей поддержки браузеров */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Утилиты для обрезки строк */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Стили форматирования текста */
+.formatted-text {
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.formatted-text strong {
+  font-weight: 600;
+}
+
+.formatted-text em {
+  font-style: italic;
+}
+
+.formatted-text u {
+  text-decoration: underline;
+}
+
+/* Обеспечение правильного выравнивания текста */
+.text-justify {
+  text-align: justify;
+}
+
+/* Пользовательские стили фокуса */
+.focus-ring {
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 768px) {
+  .mobile-scroll-snap {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .mobile-scroll-snap > * {
+    scroll-snap-align: start;
+  }
+  
+  /* Улучшенная прокрутка на мобильных */
+  .mobile-overflow-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Скрытие скроллбара на мобильных для чистого вида */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Анимации для плавных переходов */
+.transition-all-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Стили для карточек задач */
+.task-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Стили для кнопок */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Стили для модальных окон */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Улучшенные стили для форм */
+.form-input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #CFE8FF;
+  box-shadow: 0 0 0 3px rgba(207, 232, 255, 0.3);
+}
+
+/* Стили для календаря */
+.calendar-day {
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+  background-color: rgba(207, 232, 255, 0.1);
+}
+
+/* Стили для аналитики */
+.chart-bar {
+  transition: height 0.5s ease;
+}
+
+/* Стили для пользовательских аватаров */
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Стили для статусных индикаторов */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.1;
+  transform: scale(1.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.4);
+  }
+}
+
+/* Стили для загрузки */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Стили для уведомлений */
+.notification {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Стили для перетаскивания */
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+}
+
+.drop-zone {
+  transition: background-color 0.2s ease;
+}
+
+.drop-zone.active {
+  background-color: rgba(207, 232, 255, 0.2);
+  border-color: #CFE8FF;
+}
+
+/* Стили для мобильной навигации */
+.mobile-nav {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Стили для адаптивной сетки */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Стили для улучшенной типографики */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Стили для теней */
+.shadow-soft {
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-strong {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
+}
+
+/* Стили для интерактивных элементов */
+.interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interactive:hover {
+  transform: translateY(-1px);
+}
+
+.interactive:active {
+  transform: translateY(0);
+}
+
+/* Стили для фокуса клавиатуры */
+.focus-visible {
+  outline: 2px solid #CFE8FF;
+  outline-offset: 2px;
+}
+
+/* Стили для скрытия элементов на мобильных */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* Стили для показа элементов только на мобильных */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
